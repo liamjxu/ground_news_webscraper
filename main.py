@@ -6,6 +6,24 @@ import json
 import time
 
 
+def main(url, headers):
+    html_text = requests.get(url, headers=headers).text
+    soup = BeautifulSoup(html_text, 'lxml')
+    section = soup.find_all('section', id='newsroom-feed-tablet-and-mobile')
+    hrefs = [a['href'] for a in section.find_all('a', href=True)]
+
+    result = {}
+    for href in hrefs[:2]:
+        full_url = url + href
+        story_data = get_one_story(full_url)
+        result[href.split('/')[-1].split('_')[0]] = story_data
+
+    print('Found stories: ', len(result))
+    print('# Articles: ', len([y for x in list(result.values()) for y in x]))
+    with open('ground_news.json', 'w', encoding='utf-8') as f:
+        json.dump(result, f, indent=4, ensure_ascii=False)
+
+
 def get_one_story(full_url):
     html_text = get_html_with_all_articles(full_url)
     soup = BeautifulSoup(html_text, 'lxml')
@@ -55,26 +73,12 @@ def get_html_with_all_articles(url):
 
 
 if __name__ == '__main__':
-    tic = time.time()
     url = "https://ground.news"
     headers = {"User-Agent": "Mozilla/5.0 (Linux; U; Android 4.2.2; he-il; NEO-X5-116A Build/JDQ39) AppleWebKit/534.30 ("
                              "KHTML, like Gecko) Version/4.0 Safari/534.30"}
-    html_text = requests.get(url, headers=headers).text
-    soup = BeautifulSoup(html_text, 'lxml')
-    section = soup.find_all('section', id='newsroom-feed-tablet-and-mobile')
-
-    hrefs = [a['href'] for a in section.find_all('a', href=True)]
-
-    result = {}
-    for href in hrefs[:2]:
-        full_url = url + href
-        story_data = get_one_story(full_url)
-        
-        result[href.split('/')[-1].split('_')[0]] = story_data
-
-    print('Found stories: ', len(result))
-    print('# Titles: ', len([y for x in list(result.values()) for y in x]))
-    with open('ground_news.json', 'w', encoding='utf-8') as f:
-        json.dump(result, f, indent=4, ensure_ascii=False)
+    
+    tic = time.time()
+    main(url)
     toc = time.time()
+    
     print(toc - tic)
