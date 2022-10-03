@@ -16,7 +16,7 @@ password = creds['password']
 
 def main(source):
     root_url = "https://ground.news"
-    
+
     hrefs = get_hrefs(source)
     print(len(hrefs))
 
@@ -33,12 +33,11 @@ def main(source):
     print('# Articles: ', len([y for x in list(result.values()) for y in x]))
 
 
-def get_hrefs(source : str = 'main'):
-
+def get_hrefs(source: str = 'main'):
     root_url = "https://ground.news"
     headers = {"User-Agent": "Mozilla/5.0 (Linux; U; Android 4.2.2; he-il; NEO-X5-116A Build/JDQ39) AppleWebKit/534.30 ("
                              "KHTML, like Gecko) Version/4.0 Safari/534.30"}
-    
+
     if source == 'main':
         url = "https://ground.news"
         html_text = requests.get(url, headers=headers).text
@@ -46,7 +45,7 @@ def get_hrefs(source : str = 'main'):
         section = soup.find_all('section', id='newsroom-feed-tablet-and-mobile')
         hrefs = [a['href'] for a in section.find_all('a', href=True)]
 
-    elif source.startswith('interest/') :
+    elif source.startswith('interest/'):
         url = root_url + '/' + source
         html_text = get_html_with_more_stories(url, more=15)
         soup = BeautifulSoup(html_text, 'lxml')
@@ -55,6 +54,7 @@ def get_hrefs(source : str = 'main'):
         hrefs = [a['href'] for _ in [top_news, latest_news] for a in _.find_all('a', href=True)]
 
     return hrefs
+
 
 def get_one_story(full_url):
     html_text = get_html_with_more_stories(full_url, more='all', no_login=True)
@@ -67,7 +67,7 @@ def get_one_story(full_url):
         abstracts = summary.find_all('p', class_='font-normal text-18 leading-9 break-words')
         buttons = summary.find_all('button')
         hrefs = [a['href'] for a in summary.find_all('a', href=True, class_='flex flex-col gap-8px cursor-pointer w-full')]
-        #TODO: elegant verification
+        # TODO: elegant verification
         if len(abstracts) > 1:
             print(titles, names, abstracts)
         assert len(names) == 1
@@ -99,44 +99,44 @@ def get_html_with_more_stories(url, more=5, no_login=False, suppress_browser=Tru
     if no_login is False:
         try:
             login(driver)
-        except:
+        except BaseException:
             pass
 
     # Get more story id
     button_id = 'more-stories'
     try:
         driver.find_element(By.ID, 'more-stories')
-    except:
+    except BaseException:
         button_id = 'more_stories'
-    
+
     if more == 'all':
         yes_more_stories = True
         while yes_more_stories:
             try:
-                #close
+                # close
                 close_input = driver.find_element(By.XPATH, "//button[@class='react-responsive-modal-closeButton']")
                 close_input.click()
-            except:
+            except BaseException:
                 pass
 
             try:
                 driver.find_element(By.ID, button_id).click()
-            except:
+            except BaseException:
                 yes_more_stories = False
     else:
         cnt = 0
         while cnt < more:
             time.sleep(1)
             try:
-                #close
+                # close
                 close_input = driver.find_element(By.XPATH, "//button[@class='react-responsive-modal-closeButton']")
                 close_input.click()
-            except:
+            except BaseException:
                 pass
 
             try:
                 driver.find_element(By.ID, button_id).click()
-            except:
+            except BaseException:
                 pass
             cnt += 1
 
@@ -161,9 +161,9 @@ def login(driver):
 
 
 if __name__ == '__main__':
-  
+
     tic = time.time()
     main('interest/roe-v-wade')
     toc = time.time()
-    
+
     print(toc - tic)
