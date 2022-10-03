@@ -1,6 +1,8 @@
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options  # for suppressing the browser
+
 import requests
 import json
 import time
@@ -86,8 +88,13 @@ def get_one_story(full_url):
     return ret
 
 
-def get_html_with_more_stories(url, more=5, no_login=False):
-    driver = webdriver.Chrome()
+def get_html_with_more_stories(url, more=5, no_login=False, suppress_browser=True):
+    if suppress_browser:
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        driver = webdriver.Chrome(options=chrome_options)
+    else:
+        driver = webdriver.Chrome()
     driver.get(url)
     if no_login is False:
         try:
@@ -156,7 +163,7 @@ def login(driver):
 if __name__ == '__main__':
   
     tic = time.time()
-    main('interest/tech')
+    main('interest/roe-v-wade')
     toc = time.time()
     
     print(toc - tic)
