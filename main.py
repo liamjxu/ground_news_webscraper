@@ -1,10 +1,14 @@
 from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.common.by import By
 import requests
 import json
+import time
 
 
 def get_title_and_name(full_url, headers):
-    html_text = requests.get(full_url, headers=headers).text
+    html_text = get_value(full_url)
+    # html_text = requests.get(full_url, headers=headers).text
     soup = BeautifulSoup(html_text, 'lxml')
     summaries = soup.find_all('div', class_='relative hidden tablet:flex')
     ret = {}
@@ -16,8 +20,20 @@ def get_title_and_name(full_url, headers):
         ret[names[0].text.strip()] = titles[0].text.strip()
     return ret
 
-if __name__ == '__main__':
 
+def get_value(url):
+    driver = webdriver.Chrome()
+    driver.get(url)
+    
+    # while driver.find_element(By.ID, 'more-stories'):
+    driver.find_element(By.ID, 'more-stories').click()
+    val = driver.page_source
+    driver.quit()
+    return val
+
+
+if __name__ == '__main__':
+    tic = time.time()
     url = "https://ground.news"
     headers = {"User-Agent": "Mozilla/5.0 (Linux; U; Android 4.2.2; he-il; NEO-X5-116A Build/JDQ39) AppleWebKit/534.30 ("
                              "KHTML, like Gecko) Version/4.0 Safari/534.30"}
@@ -34,6 +50,8 @@ if __name__ == '__main__':
         result[href.split('/')[-1].split('_')[0]] = name_title
 
     print('Found stories: ', len(result))
-    print('Title per story: ', len(list(result.values())[0]))
+    print('All titles: ', len([y for x in list(result.values()) for y in x]))
     with open('title_name.json', 'w') as f:
         json.dump(result, f, indent=4)
+    toc = time.time()
+    print(toc - tic)
