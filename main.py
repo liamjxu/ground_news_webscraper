@@ -11,7 +11,7 @@ def get_one_story(full_url):
     soup = BeautifulSoup(html_text, 'lxml')
     summaries = soup.find_all('div', class_='relative hidden tablet:flex')
     ret = []
-    for summary in summaries:
+    for idx, summary in enumerate(summaries):
         titles = summary.find_all('h4', class_='text-22 leading-11')
         names = summary.find_all('div', class_='flex bg-light-light rounded-full px-1 py-1/2 gap-8px items-center dark:bg-dark-light')
         abstracts = summary.find_all('p', class_='font-normal text-18 leading-9 break-words')
@@ -25,6 +25,7 @@ def get_one_story(full_url):
         assert len(abstracts) == 1
         assert len(hrefs) == 1
         entry = {
+            'index': idx,
             'title': titles[0].text,
             'name': names[0].text,
             'abstract': abstracts[0].text,
