@@ -6,30 +6,46 @@ import json
 import time
 
 
-def get_title_and_name(full_url, headers):
-    html_text = get_value(full_url)
-    # html_text = requests.get(full_url, headers=headers).text
+def get_one_story(full_url):
+    html_text = get_html_with_all_articles(full_url)
     soup = BeautifulSoup(html_text, 'lxml')
-    summaries = soup.find_all('div', class_='relative hidden tablet:flex')
-    ret = {}
+    summaries = soup.find_all('div', class_='relative tablet:hidden')
+    ret = []
     for summary in summaries:
         titles = summary.find_all('h4', class_='text-22 leading-11')
         names = summary.find_all('div', class_='flex bg-light-light rounded-full px-1 py-1/2 gap-8px items-center dark:bg-dark-light')
+        abstracts = summary.find_all('p', class_='font-normal text-18 leading-9')
+        buttons = [button.text for button in summary.find_all('button')]
+        #TODO: elegant verification
+        if len(abstracts) > 1:
+            print(titles, names, abstracts)
         assert len(names) == 1
         assert len(titles) == 1
-        ret[names[0].text.strip()] = titles[0].text.strip()
+        assert len(abstracts) == 1
+        entry = {
+            'title': titles[0].text,
+            'name': names[0].text,
+            'abstract': abstracts[0].text,
+            'buttons': buttons
+        }
+        ret.append(entry)
     return ret
 
 
-def get_value(url):
+def get_html_with_all_articles(url):
     driver = webdriver.Chrome()
     driver.get(url)
     
-    # while driver.find_element(By.ID, 'more-stories'):
-    driver.find_element(By.ID, 'more-stories').click()
-    val = driver.page_source
+    yes_more_stories = True
+    while yes_more_stories:
+        try:
+            driver.find_element(By.ID, 'more-stories').click()
+        except:
+            yes_more_stories = False
+
+    html_text = driver.page_source
     driver.quit()
-    return val
+    return html_text
 
 
 if __name__ == '__main__':
@@ -44,14 +60,15 @@ if __name__ == '__main__':
     hrefs = [a['href'] for a in section.find_all('a', href=True)]
 
     result = {}
-    for href in hrefs:
+    for href in hrefs[:2]:
         full_url = url + href
-        name_title = get_title_and_name(full_url, headers)
-        result[href.split('/')[-1].split('_')[0]] = name_title
+        story_data = get_one_story(full_url)
+        
+        result[href.split('/')[-1].split('_')[0]] = story_data
 
     print('Found stories: ', len(result))
-    print('All titles: ', len([y for x in list(result.values()) for y in x]))
-    with open('title_name.json', 'w') as f:
+    print('# Titles: ', len([y for x in list(result.values()) for y in x]))
+    with open('ground_news.json', 'w') as f:
         json.dump(result, f, indent=4)
     toc = time.time()
     print(toc - tic)
