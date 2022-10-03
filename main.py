@@ -28,6 +28,8 @@ def main(source: str = 'main'):
         if (idx + 1) % 10 == 0:
             with open(f'{source}.json', 'w', encoding='utf-8') as f:
                 json.dump(result, f, indent=4, ensure_ascii=False)
+        with open(f'{source}.json', 'w', encoding='utf-8') as f:
+            json.dump(result, f, indent=4, ensure_ascii=False)
 
     print('source: ', source)
     print('Found stories: ', len(result))
@@ -170,7 +172,8 @@ if __name__ == '__main__':
         print(topic)
         try:
             tic = time.time()
-            main(f'interest/{topic.lower()}')
+            topic = topic.lower().replace(' ', '-')
+            main(f'interest/{topic}')
             toc = time.time()
             print(toc - tic)
         except BaseException:
