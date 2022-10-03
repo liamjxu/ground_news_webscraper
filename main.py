@@ -5,6 +5,12 @@ import requests
 import json
 import time
 
+# Credentials
+with open('credentials.json', 'r', encoding='utf-8') as f:
+    creds = json.load(f)
+username = creds['username']
+password = creds['password']
+
 
 def main(source):
     root_url = "https://ground.news"
@@ -25,7 +31,7 @@ def main(source):
     print('# Articles: ', len([y for x in list(result.values()) for y in x]))
 
 
-def get_hrefs(source='main'):
+def get_hrefs(source : str = 'main'):
 
     root_url = "https://ground.news"
     headers = {"User-Agent": "Mozilla/5.0 (Linux; U; Android 4.2.2; he-il; NEO-X5-116A Build/JDQ39) AppleWebKit/534.30 ("
@@ -38,7 +44,7 @@ def get_hrefs(source='main'):
         section = soup.find_all('section', id='newsroom-feed-tablet-and-mobile')
         hrefs = [a['href'] for a in section.find_all('a', href=True)]
 
-    elif source == 'interest/politics':
+    elif source.startswith('interest/') :
         url = root_url + '/' + source
         html_text = get_html_with_more_stories(url, more=15)
         soup = BeautifulSoup(html_text, 'lxml')
@@ -137,8 +143,6 @@ def login(driver):
     login_button.click()
 
     # Login
-    username = "lilynette789@gmail.com"
-    password = "limanling"
     username_input = driver.find_element(By.XPATH, "//input[@type='email']")
     username_input.send_keys(username)
     password_input = driver.find_element(By.XPATH, "//input[@type='password']")
@@ -152,7 +156,7 @@ def login(driver):
 if __name__ == '__main__':
   
     tic = time.time()
-    main('interest/politics')
+    main('interest/tech')
     toc = time.time()
     
     print(toc - tic)
