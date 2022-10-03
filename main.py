@@ -14,7 +14,7 @@ username = creds['username']
 password = creds['password']
 
 
-def main(source):
+def main(source: str = 'main'):
     root_url = "https://ground.news"
 
     hrefs = get_hrefs(source)
@@ -26,17 +26,18 @@ def main(source):
         story_data = get_one_story(full_url)
         result[href.split('/')[-1].split('_')[0]] = story_data
         if (idx + 1) % 10 == 0:
-            with open('ground_news.json', 'w', encoding='utf-8') as f:
+            with open(f'{source}.json', 'w', encoding='utf-8') as f:
                 json.dump(result, f, indent=4, ensure_ascii=False)
 
+    print('source: ', source)
     print('Found stories: ', len(result))
     print('# Articles: ', len([y for x in list(result.values()) for y in x]))
 
 
 def get_hrefs(source: str = 'main'):
     root_url = "https://ground.news"
-    headers = {"User-Agent": "Mozilla/5.0 (Linux; U; Android 4.2.2; he-il; NEO-X5-116A Build/JDQ39) AppleWebKit/534.30 ("
-                             "KHTML, like Gecko) Version/4.0 Safari/534.30"}
+    headers = {"User-Agent": "Mozilla/5.0 (Linux; U; Android 4.2.2; he-il; NEO-X5-116A Build/JDQ39) AppleWebKit/534.30"
+                             " (KHTML, like Gecko) Version/4.0 Safari/534.30"}
 
     if source == 'main':
         url = "https://ground.news"
@@ -145,7 +146,7 @@ def get_html_with_more_stories(url, more=5, no_login=False, suppress_browser=Tru
     return html_text
 
 
-def login(driver):
+def login(driver: webdriver.Chrome):
     login_button = driver.find_element(By.ID, "header-login")
     login_button.click()
 
@@ -162,8 +163,15 @@ def login(driver):
 
 if __name__ == '__main__':
 
-    tic = time.time()
-    main('interest/roe-v-wade')
-    toc = time.time()
+    with open('topic_list.json', 'r') as f:
+        topic_list = json.load(f)
 
-    print(toc - tic)
+    for topic in topic_list:
+        print(topic)
+        try:
+            tic = time.time()
+            main(f'interest/{topic.lower()}')
+            toc = time.time()
+            print(toc - tic)
+        except BaseException:
+            pass
