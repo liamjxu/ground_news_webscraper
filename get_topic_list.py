@@ -15,3 +15,6 @@ topics = [div.find('span').text for div in divs]
 
 with open('topic_list.json', 'w', encoding='utf-8') as f:
     json.dump(topics, f, indent=4)
+
+
+# TODO: Get topics from related topics
