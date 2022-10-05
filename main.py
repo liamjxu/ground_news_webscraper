@@ -7,12 +7,6 @@ import requests
 import json
 import time
 
-# Credentials
-with open('credentials.json', 'r', encoding='utf-8') as f:
-    creds = json.load(f)
-username = creds['username']
-password = creds['password']
-
 
 def main(source: str = 'main'):
     root_url = "https://ground.news"
@@ -164,6 +158,12 @@ def login(driver: webdriver.Chrome):
 
 
 if __name__ == '__main__':
+
+    # Credentials
+    with open('credentials.json', 'r', encoding='utf-8') as f:
+        creds = json.load(f)
+    username = creds['username']
+    password = creds['password']
 
     with open('topic_list.json', 'r') as f:
         topic_list = json.load(f)
