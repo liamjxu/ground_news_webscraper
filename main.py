@@ -160,12 +160,14 @@ def login(driver: webdriver.Chrome):
 
 
 if __name__ == '__main__':
-    PROCESS_NUMBER = 15  # the number of working processes
     parser = argparse.ArgumentParser()
-    parser.add_argument('--rank', type=int,
+    parser.add_argument('--rank', type=int, 
                         help='the local rank of the current process')
+    parser.add_argument('--num_proc', type=int, 
+                        help='the number of total processes')
     args = parser.parse_args()
     rank = args.rank
+    PROCESS_NUMBER = args.num_proc  # the number of working processes
     
     # Credentials
     with open('credentials.json', 'r', encoding='utf-8') as f:
@@ -181,7 +183,7 @@ if __name__ == '__main__':
     start = rank * segment_width
     end = min(len(topic_list), start + segment_width)
 
-    logs = []
+    logs = ['In Progress'] 
     for idx, (name, href) in enumerate(topic_list[start:end]):
         log = {'name': name}
         try:
@@ -195,8 +197,8 @@ if __name__ == '__main__':
             log['status'] = 'Failed'
             log['time'] = 0
             logs.append(log)
-        if idx % 10 == 0:
-            with open(f'logs/rank_{rank}.json', 'w', encoding='utf-8') as f:
-                json.dump(logs, f)
+        with open(f'logs/rank_{rank}.json', 'w', encoding='utf-8') as f:
+            json.dump(logs, f, ensure_ascii=False, indent=4)
     with open(f'logs/rank_{rank}.json', 'w', encoding='utf-8') as f:
-        json.dump(logs, f)
+        logs = ['Finished'] + logs[1:]
+        json.dump(logs, f, ensure_ascii=False, indent=4)

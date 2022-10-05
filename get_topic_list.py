@@ -3,7 +3,7 @@ import requests
 import argparse
 from typing import List
 from bs4 import BeautifulSoup
-from functools import reduce
+from collections import OrderedDict
 
 
 class Topic():
@@ -45,14 +45,17 @@ def main(category):
             queue = queue[1:] + get_related_topics(queue[0])
             if (len(topic_list) + 1) % 10 == 0:
                 with open(f'topic_list_{category}.json', 'w', encoding='utf-8') as f:
+                    topic_list = OrderedDict(sorted(topic_list.items()))
                     json.dump(topic_list, f, indent=4, ensure_ascii=False)
             with open(f'topic_list_{category}.json', 'w', encoding='utf-8') as f:
+                topic_list = OrderedDict(sorted(topic_list.items()))
                 json.dump(topic_list, f, indent=4, ensure_ascii=False)
         if len(topic_list) >= 500:
             break
         if (len(topic_list) + 1) % 10 == 0:
             print(f'Collected {len(topic_list)} topics from {category}.')
     print(f'{category} is finished')
+
 
 def get_related_topics(topic: Topic) -> List[Topic]:
     topic, href = topic.get_tuple()
