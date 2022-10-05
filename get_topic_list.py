@@ -52,7 +52,7 @@ def main(category):
                 json.dump(topic_list, f, indent=4, ensure_ascii=False)
         if len(topic_list) >= 500:
             break
-        if (len(topic_list) + 1) % 10 == 0:
+        if len(topic_list) % 10 == 0:
             print(f'Collected {len(topic_list)} topics from {category}.')
     print(f'{category} is finished')
 

@@ -21,15 +21,17 @@ def main(source: str = 'main'):
         full_url = root_url + href
         story_data = get_one_story(full_url)
         result[href.split('/')[-1].split('_')[0]] = story_data
-        if (idx + 1) % 10 == 0:
+        # Save the stored stories every 5 discoveries
+        if (idx + 1) % 5 == 0:
             with open(f'interest/{href_name}.json', 'w', encoding='utf-8') as f:
                 json.dump(result, f, indent=4, ensure_ascii=False)
-        with open(f'interest/{href_name}.json', 'w', encoding='utf-8') as f:
-            json.dump(result, f, indent=4, ensure_ascii=False)
+    with open(f'interest/{href_name}.json', 'w', encoding='utf-8') as f:
+        json.dump(result, f, indent=4, ensure_ascii=False)
 
-    print('source: ', source)
-    print('Found stories: ', len(result))
-    print('# Articles: ', len([y for x in list(result.values()) for y in x]))
+    story_num = len(result)
+    article_num = len([y for x in list(result.values()) for y in x])
+    return source, story_num, article_num
+
 
 
 def get_hrefs(source: str = 'main'):
@@ -188,14 +190,18 @@ if __name__ == '__main__':
         log = {'name': name}
         try:
             tic = time.time()
-            main(href)
+            source, story_num, article_num = main(href)
             toc = time.time()
             log['status'] = 'Successful'
             log['time'] = toc - tic
+            log['source'] = source
+            log['story_num'] = story_num
+            log['article_num'] = article_num
             logs.append(log)
-        except BaseException:
+        except BaseException as e:
             log['status'] = 'Failed'
             log['time'] = 0
+            log['error message'] = e.message
             logs.append(log)
         with open(f'logs/rank_{rank}.json', 'w', encoding='utf-8') as f:
             json.dump(logs, f, ensure_ascii=False, indent=4)
