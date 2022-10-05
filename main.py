@@ -1,18 +1,20 @@
+import requests
+import json
+import time
+import argparse
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options  # for suppressing the browser
 
-import requests
-import json
-import time
 
 
 def main(source: str = 'main'):
+    href_name = source.split('/')[-1]
     root_url = "https://ground.news"
 
     hrefs = get_hrefs(source)
-    print(len(hrefs))
+    print('length of found hrefs:', len(hrefs))
 
     result = {}
     for idx, href in enumerate(hrefs):
@@ -20,9 +22,9 @@ def main(source: str = 'main'):
         story_data = get_one_story(full_url)
         result[href.split('/')[-1].split('_')[0]] = story_data
         if (idx + 1) % 10 == 0:
-            with open(f'{source}.json', 'w', encoding='utf-8') as f:
+            with open(f'interest/{href_name}.json', 'w', encoding='utf-8') as f:
                 json.dump(result, f, indent=4, ensure_ascii=False)
-        with open(f'{source}.json', 'w', encoding='utf-8') as f:
+        with open(f'interest/{href_name}.json', 'w', encoding='utf-8') as f:
             json.dump(result, f, indent=4, ensure_ascii=False)
 
     print('source: ', source)
@@ -158,22 +160,43 @@ def login(driver: webdriver.Chrome):
 
 
 if __name__ == '__main__':
-
+    PROCESS_NUMBER = 15  # the number of working processes
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--rank', type=int,
+                        help='the local rank of the current process')
+    args = parser.parse_args()
+    rank = args.rank
+    
     # Credentials
     with open('credentials.json', 'r', encoding='utf-8') as f:
         creds = json.load(f)
     username = creds['username']
     password = creds['password']
 
+    # Get topic_list and preprocessing
     with open('topic_list.json', 'r') as f:
         topic_list = json.load(f)
+    topic_list = list(sorted(topic_list.items()))
+    segment_width = (len(topic_list) - 1) // PROCESS_NUMBER + 1
+    start = rank * segment_width
+    end = min(len(topic_list), start + segment_width)
 
-    for name, href in topic_list.items():
-        print(name)
+    logs = []
+    for idx, (name, href) in enumerate(topic_list[start:end]):
+        log = {'name': name}
         try:
             tic = time.time()
-            main(f'href')
+            main(href)
             toc = time.time()
-            print(toc - tic)
+            log['status'] = 'Successful'
+            log['time'] = toc - tic
+            logs.append(log)
         except BaseException:
-            pass
+            log['status'] = 'Failed'
+            log['time'] = 0
+            logs.append(log)
+        if idx % 10 == 0:
+            with open(f'logs/rank_{rank}.json', 'w', encoding='utf-8') as f:
+                json.dump(logs, f)
+    with open(f'logs/rank_{rank}.json', 'w', encoding='utf-8') as f:
+        json.dump(logs, f)
