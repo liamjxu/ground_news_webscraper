@@ -51,7 +51,8 @@ def main(category):
         if len(topic_list) >= 500:
             break
         if (len(topic_list) + 1) % 10 == 0:
-            print(len(topic_list))
+            print(f'Collected {len(topic_list)} topics from {category}.')
+    print(f'{category} is finished')
 
 def get_related_topics(topic: Topic) -> List[Topic]:
     topic, href = topic.get_tuple()
