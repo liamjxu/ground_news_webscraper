@@ -1,4 +1,6 @@
 #!/bin/bash
+
+# usage: main.sh <the desired number of processes>
 START=0
 END=$1-1
 for (( i=$START; i<=$END; i++ ))
