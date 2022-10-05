@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options  # for suppressing the browser
-
+from selenium.common.exceptions import WebDriverException
 
 
 def main(source: str = 'main'):
@@ -39,20 +39,20 @@ def get_hrefs(source: str = 'main'):
     headers = {"User-Agent": "Mozilla/5.0 (Linux; U; Android 4.2.2; he-il; NEO-X5-116A Build/JDQ39) AppleWebKit/534.30"
                              " (KHTML, like Gecko) Version/4.0 Safari/534.30"}
 
-    if source == 'main':
-        url = "https://ground.news"
-        html_text = requests.get(url, headers=headers).text
-        soup = BeautifulSoup(html_text, 'lxml')
-        section = soup.find_all('section', id='newsroom-feed-tablet-and-mobile')
-        hrefs = [a['href'] for a in section.find_all('a', href=True)]
-
-    elif source.startswith('/interest/'):
+    if source.startswith('/interest/'):
         url = root_url + source
         html_text = get_html_with_more_stories(url, more=15)
         soup = BeautifulSoup(html_text, 'lxml')
         top_news = soup.find('div', class_='col-span-12 desktop:col-span-12 flex flex-col gap-3_2 desktop:pr-1_6')
         latest_news = soup.find('div', class_='col-span-12 desktop:col-span-9 flex flex-col gap-3_2 desktop:pr-1_6')
-        hrefs = [a['href'] for _ in [top_news, latest_news] for a in _.find_all('a', href=True)]
+        if top_news is not None:
+            hrefs_top = [a['href'] for a in top_news.find_all('a', href=True)]
+        if latest_news is not None:
+            hrefs_latest = [a['href'] for a in latest_news.find_all('a', href=True)]
+        hrefs = hrefs_top + hrefs_latest
+
+    else:
+        raise Exception('the source does not comply with the format "/interest/<topic_name>"')
 
     return hrefs
 
@@ -177,15 +177,20 @@ if __name__ == '__main__':
     username = creds['username']
     password = creds['password']
 
-    # Get topic_list and preprocessing
+    # Initialize the logs of the current process.
+    logs = ['In Progress']
+    with open(f'logs/rank_{rank}.json', 'w', encoding='utf-8') as f:
+        json.dump(logs, f, ensure_ascii=False, indent=4)
+
+    # Get topic_list and preprocessing to get the segment the current process is responsible for.
     with open('topic_list.json', 'r') as f:
         topic_list = json.load(f)
-    topic_list = list(sorted(topic_list.items()))
+    topic_list = list(sorted(topic_list.items()))[:20]
     segment_width = (len(topic_list) - 1) // PROCESS_NUMBER + 1
     start = rank * segment_width
     end = min(len(topic_list), start + segment_width)
 
-    logs = ['In Progress'] 
+    # Go through the segment and log each the status of each topic.
     for idx, (name, href) in enumerate(topic_list[start:end]):
         log = {'name': name}
         try:
@@ -198,13 +203,17 @@ if __name__ == '__main__':
             log['story_num'] = story_num
             log['article_num'] = article_num
             logs.append(log)
-        except BaseException as e:
+        except (BaseException, WebDriverException) as e:
             log['status'] = 'Failed'
             log['time'] = 0
-            log['error message'] = e.message
+            log['error message'] = e.msg if isinstance(e, WebDriverException) else e
             logs.append(log)
+        # Each time a topic is finished, save the log of the current process.
+        # Each topic takes ~10mins
         with open(f'logs/rank_{rank}.json', 'w', encoding='utf-8') as f:
             json.dump(logs, f, ensure_ascii=False, indent=4)
+    
+    # At the end, mark the process as finished.
     with open(f'logs/rank_{rank}.json', 'w', encoding='utf-8') as f:
         logs = ['Finished'] + logs[1:]
         json.dump(logs, f, ensure_ascii=False, indent=4)
