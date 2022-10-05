@@ -19,7 +19,10 @@ pre_len = len(topic_list)
 topic_list |= all_d
 post_len = len(topic_list)
 
+with open('topic_list_orig.json', 'w', encoding='utf-8') as f:
+    json.dump(topic_list, f, indent=4, ensure_ascii=False)
+
 with open('topic_list.json', 'w', encoding='utf-8') as f:
-    json.dump(OrderedDict(sorted(all_d.items())), f, indent=4, ensure_ascii=False)
+    json.dump(OrderedDict(sorted(topic_list.items())), f, indent=4, ensure_ascii=False)
 
 print(f'One compilation finished, {post_len - pre_len} more topics are found, currently have {post_len} in total.')
