@@ -1,8 +1,10 @@
 import json
 import requests
-from typing import Dict, List
+import argparse
+from typing import List
 from bs4 import BeautifulSoup
 from functools import reduce
+
 
 class Topic():
     def __init__(self, topic_name, topic_href):
@@ -20,8 +22,8 @@ class Topic():
         return [cls(name, href) for name, href in zip(names, hrefs)]
 
 
-def main():
-    url = "https://ground.news/my/discover/topic"
+def main(category):
+    url = f'https://ground.news/my/discover/{category}'
     headers = {"User-Agent": "Mozilla/5.0 (Linux; U; Android 4.2.2; he-il; NEO-X5-116A Build/JDQ39) AppleWebKit/534.30 ("
                              "KHTML, like Gecko) Version/4.0 Safari/534.30"}
 
@@ -42,10 +44,10 @@ def main():
             topic_list |= queue[0].get_dict()
             queue = queue[1:] + get_related_topics(queue[0])
             if (len(topic_list) + 1) % 10 == 0:
-                with open('topic_list.json', 'w', encoding='utf-8') as f:
-                    json.dump(topic_list, f, indent=4)
-            with open('topic_list.json', 'w', encoding='utf-8') as f:
-                json.dump(topic_list, f, indent=4)
+                with open(f'topic_list_{category}.json', 'w', encoding='utf-8') as f:
+                    json.dump(topic_list, f, indent=4, ensure_ascii=False)
+            with open(f'topic_list_{category}.json', 'w', encoding='utf-8') as f:
+                json.dump(topic_list, f, indent=4, ensure_ascii=False)
         if len(topic_list) >= 500:
             break
         if (len(topic_list) + 1) % 10 == 0:
@@ -70,4 +72,9 @@ def name2href(topic_name):
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--category', type=str,
+                        help='the discover category that the scraper will be using as a starting point',
+                        choices=['source', 'topic', 'place', 'person'])
+    args = parser.parse_args()
+    main(args.category)
