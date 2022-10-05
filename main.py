@@ -1,4 +1,3 @@
-import requests
 import json
 import time
 import argparse
@@ -206,7 +205,7 @@ if __name__ == '__main__':
         except (BaseException, WebDriverException) as e:
             log['status'] = 'Failed'
             log['time'] = 0
-            log['error message'] = e.msg if isinstance(e, WebDriverException) else e
+            log['error message'] = e.msg if isinstance(e, WebDriverException) else str(e)
             logs.append(log)
         # Each time a topic is finished, save the log of the current process.
         # Each topic takes ~10mins
