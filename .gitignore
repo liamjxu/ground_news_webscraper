@@ -1,3 +1,4 @@
 credentials.json
 *.json
 *.zip
+*.ipynb
