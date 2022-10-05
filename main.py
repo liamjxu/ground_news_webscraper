@@ -42,8 +42,8 @@ def get_hrefs(source: str = 'main'):
         section = soup.find_all('section', id='newsroom-feed-tablet-and-mobile')
         hrefs = [a['href'] for a in section.find_all('a', href=True)]
 
-    elif source.startswith('interest/'):
-        url = root_url + '/' + source
+    elif source.startswith('/interest/'):
+        url = root_url + source
         html_text = get_html_with_more_stories(url, more=15)
         soup = BeautifulSoup(html_text, 'lxml')
         top_news = soup.find('div', class_='col-span-12 desktop:col-span-12 flex flex-col gap-3_2 desktop:pr-1_6')
@@ -168,12 +168,11 @@ if __name__ == '__main__':
     with open('topic_list.json', 'r') as f:
         topic_list = json.load(f)
 
-    for topic in topic_list:
-        print(topic)
+    for name, href in topic_list.items():
+        print(name)
         try:
             tic = time.time()
-            topic = topic.lower().replace(' ', '-')
-            main(f'interest/{topic}')
+            main(f'href')
             toc = time.time()
             print(toc - tic)
         except BaseException:
