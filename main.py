@@ -44,6 +44,8 @@ def get_hrefs(source: str = 'main'):
         soup = BeautifulSoup(html_text, 'lxml')
         top_news = soup.find('div', class_='col-span-12 desktop:col-span-12 flex flex-col gap-3_2 desktop:pr-1_6')
         latest_news = soup.find('div', class_='col-span-12 desktop:col-span-9 flex flex-col gap-3_2 desktop:pr-1_6')
+        hrefs_top = []
+        hrefs_latest = []
         if top_news is not None:
             hrefs_top = [a['href'] for a in top_news.find_all('a', href=True)]
         if latest_news is not None:
@@ -96,6 +98,7 @@ def get_html_with_more_stories(url, more=5, no_login=False, suppress_browser=Tru
     else:
         driver = webdriver.Chrome()
     driver.get(url)
+    time.sleep(1)
     if no_login is False:
         try:
             login(driver)
@@ -184,8 +187,9 @@ if __name__ == '__main__':
     # Get topic_list and preprocessing to get the segment the current process is responsible for.
     with open('topic_list.json', 'r') as f:
         topic_list = json.load(f)
-    topic_list = list(sorted(topic_list.items()))[:20]
-    segment_width = (len(topic_list) - 1) // PROCESS_NUMBER + 1
+    topic_list = list(sorted(topic_list.items()))
+    # segment_width = (len(topic_list) - 1) // PROCESS_NUMBER + 1
+    segment_width = 20
     start = rank * segment_width
     end = min(len(topic_list), start + segment_width)
 
