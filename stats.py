@@ -9,12 +9,19 @@ def qualify(articles):
     sufficient_bias = (bias['Lean Left'] + bias['Left'] >= threshold//2) and (bias['Lean Right'] + bias['Right'] >= threshold//2)
     return sufficient_bias and sufficient_quantity
 
+topic_name = 'gun-control'
+if topic_name == 'all':
+    file_list = os.listdir('interest/')
+    data = {}
+    for file in file_list:
+        with open('interest/' + file, 'r', encoding='utf-8') as f:
+            data = data | json.load(f)
 
-file_list = os.listdir('interest/')
-data = {}
-for file in file_list:
-    with open('interest/' + file, 'r', encoding='utf-8') as f:
-        data = data | json.load(f)
+
+else:
+    with open('interest/' + topic_name + '.json', 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    file_list = [data]
 
 print('the number of topics:')
 print(len(file_list))
