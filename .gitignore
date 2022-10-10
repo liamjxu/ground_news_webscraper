@@ -2,6 +2,7 @@ credentials.json
 *.json
 *.zip
 *.ipynb
+*.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
