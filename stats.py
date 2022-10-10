@@ -17,7 +17,6 @@ if topic_name == 'all':
         with open('interest/' + file, 'r', encoding='utf-8') as f:
             data = data | json.load(f)
 
-
 else:
     with open('interest/' + topic_name + '.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
