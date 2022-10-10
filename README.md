@@ -1,6 +1,5 @@
-# Ideal:
+TODO:
 
-- Get all stories on the page
-- For each story, get 
-    1. the summary by Ground News
-    2. all articles, each include (agency, title, text)
+1. dynamically update the topic list
+2. check the current logs to see whether a story has been collected etc
+3. filter high quality stories
