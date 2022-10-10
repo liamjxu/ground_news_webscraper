@@ -3,7 +3,7 @@ import json
 from collections import Counter
 
 threshold = 4
-def qualify(articles):
+def qualify(articles, threshold=4):
     sufficient_quantity = len(articles) >= threshold
     bias = Counter([_['bias'] for _ in articles])
     sufficient_bias = (bias['Lean Left'] + bias['Left'] >= threshold//2) and (bias['Lean Right'] + bias['Right'] >= threshold//2)
