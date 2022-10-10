@@ -165,13 +165,17 @@ def login(driver: webdriver.Chrome):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--rank', type=int, 
+    parser.add_argument('--rank', type=int, default=1,
                         help='the local rank of the current process')
-    parser.add_argument('--num_proc', type=int, 
-                        help='the number of total processes')
+    parser.add_argument('--source', type=str, choices=['href', 'topic_list'],
+                        default='href',
+                        help='the source of input')
+    parser.add_argument('--href', type=str, 
+                        default='/interest/gun-control',
+                        help='the href to use if source is "href"')
+
     args = parser.parse_args()
     rank = args.rank
-    PROCESS_NUMBER = args.num_proc  # the number of working processes
     
     # Credentials
     with open('credentials.json', 'r', encoding='utf-8') as f:
@@ -179,44 +183,48 @@ if __name__ == '__main__':
     username = creds['username']
     password = creds['password']
 
-    # Initialize the logs of the current process.
-    logs = ['In Progress']
-    with open(f'logs/rank_{rank}.json', 'w', encoding='utf-8') as f:
-        json.dump(logs, f, ensure_ascii=False, indent=4)
-
-    # Get topic_list and preprocessing to get the segment the current process is responsible for.
-    with open('topic_list.json', 'r') as f:
-        topic_list = json.load(f)
-    topic_list = list(sorted(topic_list.items()))
-    # segment_width = (len(topic_list) - 1) // PROCESS_NUMBER + 1
-    segment_width = 20
-    start = rank * segment_width
-    end = min(len(topic_list), start + segment_width)
-
-    # Go through the segment and log each the status of each topic.
-    for idx, (name, href) in enumerate(topic_list[start:end]):
-        log = {'name': name}
-        try:
-            tic = time.time()
-            source, story_num, article_num = main(href)
-            toc = time.time()
-            log['status'] = 'Successful'
-            log['time'] = toc - tic
-            log['source'] = source
-            log['story_num'] = story_num
-            log['article_num'] = article_num
-            logs.append(log)
-        except (BaseException, WebDriverException) as e:
-            log['status'] = 'Failed'
-            log['time'] = 0
-            log['error message'] = e.msg if isinstance(e, WebDriverException) else str(e)
-            logs.append(log)
-        # Each time a topic is finished, save the log of the current process.
-        # Each topic takes ~10mins
+    if args.source == 'topic_list':
+        # Initialize the logs of the current process.
+        logs = ['In Progress']
         with open(f'logs/rank_{rank}.json', 'w', encoding='utf-8') as f:
             json.dump(logs, f, ensure_ascii=False, indent=4)
-    
-    # At the end, mark the process as finished.
-    with open(f'logs/rank_{rank}.json', 'w', encoding='utf-8') as f:
-        logs = ['Finished'] + logs[1:]
-        json.dump(logs, f, ensure_ascii=False, indent=4)
+
+        # Get topic_list and preprocessing to get the segment the current process is responsible for.
+        with open('topic_list.json', 'r') as f:
+            topic_list = json.load(f)
+        topic_list = list(sorted(topic_list.items()))
+        segment_width = 20
+        start = rank * segment_width
+        end = min(len(topic_list), start + segment_width)
+
+        # Go through the segment and log each the status of each topic.
+        for idx, (name, href) in enumerate(topic_list[start:end]):
+            log = {'name': name}
+            try:
+                tic = time.time()
+                source, story_num, article_num = main(href)
+                toc = time.time()
+                log['status'] = 'Successful'
+                log['time'] = toc - tic
+                log['source'] = source
+                log['story_num'] = story_num
+                log['article_num'] = article_num
+                logs.append(log)
+            except (BaseException, WebDriverException) as e:
+                log['status'] = 'Failed'
+                log['time'] = 0
+                log['error message'] = e.msg if isinstance(e, WebDriverException) else str(e)
+                logs.append(log)
+            # Each time a topic is finished, save the log of the current process.
+            # Each topic takes ~10mins
+            with open(f'logs/rank_{rank}.json', 'w', encoding='utf-8') as f:
+                json.dump(logs, f, ensure_ascii=False, indent=4)
+        
+        # At the end, mark the process as finished.
+        with open(f'logs/rank_{rank}.json', 'w', encoding='utf-8') as f:
+            logs = ['Finished'] + logs[1:]
+            json.dump(logs, f, ensure_ascii=False, indent=4)
+
+    elif args.source == 'href':
+        source, story_num, article_num = main(args.href)
+        print(source, story_num, article_num)
