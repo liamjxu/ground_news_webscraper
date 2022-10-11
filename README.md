@@ -3,6 +3,7 @@ TODO:
 1. dynamically update the topic list
 2. check the current logs to see whether a story has been collected etc
 3. make the `news_collector` into a class
+4. record which websites we have etc, expanding 
 
 
 Done:
