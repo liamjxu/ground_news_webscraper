@@ -1,24 +1,31 @@
+import time
 import pathlib
 import json
-from tqdm import tqdm
+import argparse
+# from tqdm import tqdm
 from stats import qualify
 from newsplease import NewsPlease
 
 
 def get_news_for_topic(topic):
-    pathlib.Path(f'news/{topic}').mkdir(parents=True, exist_ok=True)
     with open(f'interest/{topic}.json', 'r', encoding='utf-8') as f:
         stories = json.load(f)
-    bad_cases = []
-    for idx, (story, all_metadata) in enumerate(stories.items()):
-        if idx % 5 == 0:
-            print('idx: ', idx)
+    # if the loading succeeded, make directory
+    pathlib.Path(f'news/{topic}').mkdir(parents=True, exist_ok=True)
+    logs = {'Topic Progress': f'-1 / {len(stories)}'}
+    with open(f'news/{topic}/0-logs.json', 'w', encoding='utf-8') as f:
+        json.dump(logs, f, indent=4, ensure_ascii=False)
+    for story_idx, (story, all_metadata) in enumerate(stories.items()):
+        story_log = []
         if not qualify(all_metadata):
             continue
         all_article = []
-        for metadata in tqdm(all_metadata):
+        for article_idx, metadata in enumerate(all_metadata):
+            # print(f'current article: {article_idx} / {len(all_metadata)}')
             try:
-                article = NewsPlease.from_url(metadata['source link'])
+                # get article and process
+                article = NewsPlease.from_url(metadata['source link'], timeout=6)
+                article.__setattr__('article_idx', metadata['index'])
                 article.__setattr__('bias', metadata['bias'])
                 article.__setattr__('factuality', metadata['factuality'])
                 article.__setattr__('name', metadata['name'])
@@ -26,8 +33,11 @@ def get_news_for_topic(topic):
                     article.__setattr__('date_publish', article.date_publish.strftime('%m/%d/%Y'))
                 else:
                     article.__setattr__('date_publish', None)
+
+                # store the collected full text
                 all_article.append({
                     key: article.__getattribute__(key) for key in [
+                        'article_idx',
                         'bias',
                         'factuality',
                         'name',
@@ -41,19 +51,63 @@ def get_news_for_topic(topic):
                         'maintext'
                     ]
                 })
+                # store the data, update the logs
                 with open(f'news/{topic}/{story}.json', 'w', encoding='utf-8') as f:
                     json.dump(all_article, f, indent=4, ensure_ascii=False)
+
+                # store the successful story_log
+                story_log.append({
+                    'article_idx': metadata['index'],
+                    'status': 'Successful',
+                })
+                logs[story] = story_log
+                logs['Topic Progress'] = f'{story_idx} / {len(stories)}'
+                with open(f'news/{topic}/0-logs.json', 'w', encoding='utf-8') as f:
+                    json.dump(logs, f, indent=4, ensure_ascii=False)
+
             except BaseException as e:
-                bad_cases.append({
-                    'story': story,
-                    'idx': metadata['index'],
+                # store the failed story_log
+                story_log.append({
+                    'article_idx': metadata['index'],
+                    'status': 'Failed',
                     'error_message': str(e)
                 })
-                with open(f'news/{topic}/bad_cases.json', 'w', encoding='utf-8') as f:
-                    json.dump(bad_cases, f, indent=4, ensure_ascii=False)
-
-
+                logs[story] = story_log
+                logs['Topic Progress'] = f'{story_idx} / {len(stories)}'
+                with open(f'news/{topic}/0-logs.json', 'w', encoding='utf-8') as f:
+                    json.dump(logs, f, indent=4, ensure_ascii=False)
 
 
 if __name__ == '__main__':
-    get_news_for_topic('gun-control')
+    RANK_WIDTH = 5  # 5 topics, usually takes ~5 hours
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--rank', type=int, default=1,
+                        help='the local rank of the current process')
+    parser.add_argument('--source', type=str, default='gun-control',
+                        help='the source topic, being "all" means collecting all topics')
+    args = parser.parse_args()
+
+    if args.source != 'all':
+        tic = time.time()
+        get_news_for_topic(args.source)
+        toc = time.time()
+        print(f'The topic {args.source} took {toc - tic} seconds')
+
+    else:
+        bad_topics = []
+        with open('topic_list.json', 'r', encoding='utf-8') as f:
+            topic_list = [_.strip('/interest/') for _ in json.load(f).values()]
+        for topic in topic_list[args.rank * RANK_WIDTH: (args.rank + 1) * RANK_WIDTH]:
+            print('current rank:', args.rank, 'current topic:', topic)
+            try:
+                tic = time.time()
+                get_news_for_topic(topic)
+                toc = time.time()
+                print(f'Rank {args.rank} ({args.rank * RANK_WIDTH} to {(args.rank + 1) * RANK_WIDTH}) took {toc - tic} seconds')
+            except BaseException as e:
+                bad_topics.append({
+                    'topic': topic,
+                    'error_message': str(e)
+                })
+                with open('bad_topics.json', 'w', encoding='utf-8') as f:
+                    json.dump(bad_topics, f, indent=4, ensure_ascii=False)

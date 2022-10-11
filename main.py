@@ -176,7 +176,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     rank = args.rank
-    
+
     # Credentials
     with open('credentials.json', 'r', encoding='utf-8') as f:
         creds = json.load(f)
