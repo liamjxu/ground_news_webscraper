@@ -79,7 +79,7 @@ def get_news_for_topic(topic):
 
 
 if __name__ == '__main__':
-    RANK_WIDTH = 5  # 5 topics, usually takes ~5 hours
+    RANK_WIDTH = 10  # 5 topics, usually takes ~8 hours
     parser = argparse.ArgumentParser()
     parser.add_argument('--rank', type=int, default=1,
                         help='the local rank of the current process')
@@ -96,7 +96,7 @@ if __name__ == '__main__':
     else:
         bad_topics = []
         with open('topic_list.json', 'r', encoding='utf-8') as f:
-            topic_list = [_.strip('/interest/') for _ in json.load(f).values()]
+            topic_list = [_[10:] for _ in json.load(f).values()]
         for topic in topic_list[args.rank * RANK_WIDTH: (args.rank + 1) * RANK_WIDTH]:
             print('current rank:', args.rank, 'current topic:', topic)
             try:
