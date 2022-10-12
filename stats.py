@@ -11,7 +11,7 @@ def qualify(articles, threshold=4):
 
 
 if __name__ == '__main__':
-    topic_name = 'gun-control'
+    topic_name = 'all'
     if topic_name == 'all':
         file_list = os.listdir('interest/')
         data = {}
