@@ -79,7 +79,7 @@ def get_news_for_topic(topic):
 
 
 if __name__ == '__main__':
-    RANK_WIDTH = 10  # 5 topics, usually takes ~8 hours
+    RANK_WIDTH = 5  # 5 topics, usually takes ~5 hours
     parser = argparse.ArgumentParser()
     parser.add_argument('--rank', type=int, default=1,
                         help='the local rank of the current process')
@@ -103,7 +103,7 @@ if __name__ == '__main__':
                 tic = time.time()
                 get_news_for_topic(topic)
                 toc = time.time()
-                print(f'Rank {args.rank} ({args.rank * RANK_WIDTH} to {(args.rank + 1) * RANK_WIDTH}) took {toc - tic} seconds')
+                print(f'Rank {args.rank} ({args.rank * RANK_WIDTH} to {(args.rank + 1) * RANK_WIDTH}) took {toc - tic} seconds')  # TODO: this doesn't make sense
             except BaseException as e:
                 bad_topics.append({
                     'topic': topic,
