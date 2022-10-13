@@ -36,25 +36,21 @@ def main(category):
     # BFS on the topics
     topic_list = {}
     queue = [Topic(topic_name, name2href(topic_name)) for topic_name in seed_topics]
-    while len(queue): 
+    while len(queue):
         if queue[0].name in topic_list:
             queue = queue[1:]
             continue
         else:
             topic_list |= queue[0].get_dict()
             queue = queue[1:] + get_related_topics(queue[0])
-            if (len(topic_list) + 1) % 10 == 0:
-                with open(f'topic_list_{category}.json', 'w', encoding='utf-8') as f:
-                    topic_list = OrderedDict(sorted(topic_list.items()))
-                    json.dump(topic_list, f, indent=4, ensure_ascii=False)
-            with open(f'topic_list_{category}.json', 'w', encoding='utf-8') as f:
+            with open(f'topic_collection/topic_list_{category}.json', 'w', encoding='utf-8') as f:
                 topic_list = OrderedDict(sorted(topic_list.items()))
                 json.dump(topic_list, f, indent=4, ensure_ascii=False)
-        if len(topic_list) >= 500:
+        if len(topic_list) >= 2000:
             break
-        if len(topic_list) % 10 == 0:
+        if len(topic_list) % 50 == 0:
             print(f'Collected {len(topic_list)} topics from {category}.')
-    print(f'{category} is finished')
+    print(f'{category} finished')
 
 
 def get_related_topics(topic: Topic) -> List[Topic]:
@@ -79,6 +75,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--category', type=str,
                         help='the discover category that the scraper will be using as a starting point',
-                        choices=['source', 'topic', 'place', 'person'])
+                        choices=['topic', 'place', 'person', 'source'])
     args = parser.parse_args()
     main(args.category)
