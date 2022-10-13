@@ -5,5 +5,6 @@ START=$1
 END=$2
 for (( i=$START; i<$END; i++ ))
 do
-   python main.py --rank $i
+   python -m story_collection.main --rank $i &
 done
+wait

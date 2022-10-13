@@ -1,6 +1,7 @@
 import json
 import time
 import argparse
+import os
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -32,11 +33,8 @@ def main(source: str = 'main'):
     return source, story_num, article_num
 
 
-
-def get_hrefs(source: str = 'main'):
+def get_hrefs(source: str = 'topic_list'):
     root_url = "https://ground.news"
-    headers = {"User-Agent": "Mozilla/5.0 (Linux; U; Android 4.2.2; he-il; NEO-X5-116A Build/JDQ39) AppleWebKit/534.30"
-                             " (KHTML, like Gecko) Version/4.0 Safari/534.30"}
 
     if source.startswith('/interest/'):
         url = root_url + source
@@ -65,10 +63,12 @@ def get_one_story(full_url):
     ret = []
     for idx, summary in enumerate(summaries):
         titles = summary.find_all('h4', class_='text-22 leading-11')
-        names = summary.find_all('div', class_='flex bg-light-light rounded-full px-1 py-1/2 gap-8px items-center dark:bg-dark-light')
+        names = summary.find_all('div', class_='flex bg-light-light rounded-full px-1 '
+                                               'py-1/2 gap-8px items-center dark:bg-dark-light')
         abstracts = summary.find_all('p', class_='font-normal text-18 leading-9 break-words')
         buttons = summary.find_all('button')
-        hrefs = [a['href'] for a in summary.find_all('a', href=True, class_='flex flex-col gap-8px cursor-pointer w-full')]
+        anchors = summary.find_all('a', href=True, class_='flex flex-col gap-8px cursor-pointer w-full')
+        hrefs = [a['href'] for a in anchors]
         # TODO: elegant verification
         if len(abstracts) > 1:
             print(titles, names, abstracts)
@@ -170,7 +170,7 @@ if __name__ == '__main__':
     parser.add_argument('--source', type=str, choices=['href', 'topic_list'],
                         default='href',
                         help='the source of input')
-    parser.add_argument('--href', type=str, 
+    parser.add_argument('--href', type=str,
                         default='/interest/gun-control',
                         help='the href to use if source is "href"')
 
@@ -186,16 +186,19 @@ if __name__ == '__main__':
     if args.source == 'topic_list':
         # Initialize the logs of the current process.
         logs = ['In Progress']
-        with open(f'logs/rank_{rank}.json', 'w', encoding='utf-8') as f:
+        if not os.path.exits('story_collection/logs/'):
+            os.mkdir('story_collection/logs/')
+
+        with open(f'story_collection/logs/rank_{rank}.json', 'w', encoding='utf-8') as f:
             json.dump(logs, f, ensure_ascii=False, indent=4)
 
         # Get topic_list and preprocessing to get the segment the current process is responsible for.
-        with open('topic_list.json', 'r') as f:
+        with open('topic_collection/topic_list.json', 'r') as f:
             topic_list = json.load(f)
         topic_list = list(sorted(topic_list.items()))
-        segment_width = 20
-        start = rank * segment_width
-        end = min(len(topic_list), start + segment_width)
+        SEGMENT_WIDTH = 20
+        start = rank * SEGMENT_WIDTH
+        end = min(len(topic_list), start + SEGMENT_WIDTH)
 
         # Go through the segment and log each the status of each topic.
         for idx, (name, href) in enumerate(topic_list[start:end]):
@@ -217,11 +220,11 @@ if __name__ == '__main__':
                 logs.append(log)
             # Each time a topic is finished, save the log of the current process.
             # Each topic takes ~10mins
-            with open(f'logs/rank_{rank}.json', 'w', encoding='utf-8') as f:
+            with open(f'story_collection/logs/rank_{rank}.json', 'w', encoding='utf-8') as f:
                 json.dump(logs, f, ensure_ascii=False, indent=4)
-        
+
         # At the end, mark the process as finished.
-        with open(f'logs/rank_{rank}.json', 'w', encoding='utf-8') as f:
+        with open(f'story_collection/logs/rank_{rank}.json', 'w', encoding='utf-8') as f:
             logs = ['Finished'] + logs[1:]
             json.dump(logs, f, ensure_ascii=False, indent=4)
 
