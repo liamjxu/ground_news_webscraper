@@ -34,7 +34,7 @@ The data:
 
 # TODOs:
 **General**
-* we need to reorganize the file structure
+* None yet
 
 **Topic list collection** (output: `topic_list.json`)
 * scalability (how to continue updating the topic list dynamically)

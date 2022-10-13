@@ -8,7 +8,7 @@ from newsplease import NewsPlease
 
 
 def get_news_for_topic(topic):
-    with open(f'interest/{topic}.json', 'r', encoding='utf-8') as f:
+    with open(f'story_collection/interest/{topic}.json', 'r', encoding='utf-8') as f:
         stories = json.load(f)
     # if the loading succeeded, make directory
     pathlib.Path(f'news/{topic}').mkdir(parents=True, exist_ok=True)
@@ -95,7 +95,7 @@ if __name__ == '__main__':
 
     else:
         bad_topics = []
-        with open('topic_list.json', 'r', encoding='utf-8') as f:
+        with open('topic_collection/topic_list.json', 'r', encoding='utf-8') as f:
             topic_list = [_[10:] for _ in json.load(f).values()]
         for topic in topic_list[args.rank * RANK_WIDTH: (args.rank + 1) * RANK_WIDTH]:
             print('current rank:', args.rank, 'current topic:', topic)
@@ -109,5 +109,5 @@ if __name__ == '__main__':
                     'topic': topic,
                     'error_message': str(e)
                 })
-                with open('bad_topics.json', 'w', encoding='utf-8') as f:
+                with open('full_text_collection/bad_topics.json', 'w', encoding='utf-8') as f:
                     json.dump(bad_topics, f, indent=4, ensure_ascii=False)
