@@ -23,9 +23,9 @@ def main(source: str = 'main'):
         result[href.split('/')[-1].split('_')[0]] = story_data
         # Save the stored stories every 5 discoveries
         if (idx + 1) % 5 == 0:
-            with open(f'interest/{href_name}.json', 'w', encoding='utf-8') as f:
+            with open(f'story_collection/interest/{href_name}.json', 'w', encoding='utf-8') as f:
                 json.dump(result, f, indent=4, ensure_ascii=False)
-    with open(f'interest/{href_name}.json', 'w', encoding='utf-8') as f:
+    with open(f'story_collection/interest/{href_name}.json', 'w', encoding='utf-8') as f:
         json.dump(result, f, indent=4, ensure_ascii=False)
 
     story_num = len(result)
@@ -51,7 +51,7 @@ def get_hrefs(source: str = 'topic_list'):
         hrefs = hrefs_top + hrefs_latest
 
     else:
-        raise Exception('the source does not comply with the format "/interest/<topic_name>"')
+        raise Exception(f'the href "{source}" does not comply with the format "/interest/<topic_name>"')
 
     return hrefs
 
@@ -229,5 +229,5 @@ if __name__ == '__main__':
             json.dump(logs, f, ensure_ascii=False, indent=4)
 
     elif args.source == 'href':
-        source, story_num, article_num = main(args.href)
+        source, story_num, article_num = main('/' + '/'.join(args.href.split('/')[-2:]))
         print(source, story_num, article_num)
