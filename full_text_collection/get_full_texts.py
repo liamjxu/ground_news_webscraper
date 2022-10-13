@@ -2,8 +2,7 @@ import time
 import pathlib
 import json
 import argparse
-# from tqdm import tqdm
-from stats import qualify
+from story_collection.stats import qualify
 from newsplease import NewsPlease
 
 
