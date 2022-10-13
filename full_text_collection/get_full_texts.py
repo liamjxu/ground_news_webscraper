@@ -103,7 +103,6 @@ if __name__ == '__main__':
                 tic = time.time()
                 get_news_for_topic(topic)
                 toc = time.time()
-                print(f'Rank {args.rank} ({args.rank * RANK_WIDTH} to {(args.rank + 1) * RANK_WIDTH}) took {toc - tic} seconds')  # TODO: this doesn't make sense
             except BaseException as e:
                 bad_topics.append({
                     'topic': topic,
@@ -111,3 +110,5 @@ if __name__ == '__main__':
                 })
                 with open('full_text_collection/bad_topics.json', 'w', encoding='utf-8') as f:
                     json.dump(bad_topics, f, indent=4, ensure_ascii=False)
+
+    print(f'Rank {args.rank} ({args.rank * RANK_WIDTH} to {(args.rank + 1) * RANK_WIDTH}) took {toc - tic} seconds')
