@@ -7,7 +7,7 @@ def main(args):
     # some topics don't contain stories
     all_topic = []
     for topic in os.listdir(f'{args.tag}_news'):
-        if len(list(os.listdir(f'{args.tag}_news' + topic))) > 1:
+        if len(list(os.listdir(f'{args.tag}_news/' + topic))) > 1:
             all_topic.append(topic)
     print(f'The number of collected topics: {len(all_topic)}')
 
