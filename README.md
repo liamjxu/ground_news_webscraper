@@ -36,16 +36,15 @@ The data:
 **General**
 * None yet
 
-**Topic list collection** (output: `topic_list.json`)
-* scalability (how to continue updating the topic list dynamically)
-  * get topic, check if existing, integrate topic
+**Topic list collection** (output: `topic_collection/topic_list.json`)
+* None yet
 
-**Story & Article info collection** (output: `interest/`)
+**Story & Article info collection** (output: `story_collection/interest/`)
 * serious bug: sometimes no biases are given but additional information exists, resulting in misplacements, which affects the full texts too
-* filter bad stories (due to previous crawling)
-  * sometimes a story has an empty article list
-* bug: mismatch between the topic list and the interest/ directory (not all topics in the list have been collected)
-* check the current logs to see whether a story has been collected etc
+* filter bad stories: sometimes a story has an empty article list
+* bug: mismatch between the `topic_collection/topic_list.json` and the `story_collection/interest/` directory (not all topics in the list have been collected)
+* current rank system is very confusing
+* why create and quit chrome driver every time?
 
 **Full text collection** (output: `news/`)
 * currently, the topic progress won't let us know how many are filtered because of higher quality story (HQS) requirements.
@@ -55,3 +54,4 @@ The data:
 * we need a filtering process to show how much HQS are there. (So, might as well just collect for all stories)
 * `full_text_stat.py` seems to give a higher number for HQS than `stats.py` (I really need to work on the reformatting & renaming)
 * beneficial to work on: balance load on each rank
+* check the current logs to see whether an article has been collected etc
