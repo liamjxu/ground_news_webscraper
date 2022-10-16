@@ -84,7 +84,7 @@ def get_news_for_topic(topic):
                 })
                 logs[story] = story_log
                 toc = time.time()
-                logs['Topic Progress'] = f'{story_idx} / {len(stories)}, time elapsed: {toc - tic: .2f}'
+                logs['Topic Progress'] = f'{story_idx + 1} / {len(stories)}, time elapsed: {toc - tic: .2f}'
                 with open(f'{args.tag}_news/{topic}/0-logs.json', 'w', encoding='utf-8') as f:
                     json.dump(logs, f, indent=4, ensure_ascii=False)
 
@@ -96,7 +96,7 @@ def get_news_for_topic(topic):
                     'error_message': str(e)
                 })
                 logs[story] = story_log
-                logs['Topic Progress'] = f'{story_idx} / {len(stories)}, time elapsed: {toc - tic: .2f}'
+                logs['Topic Progress'] = f'{story_idx + 1} / {len(stories)}, time elapsed: {toc - tic: .2f}'
                 with open(f'{args.tag}_news/{topic}/0-logs.json', 'w', encoding='utf-8') as f:
                     json.dump(logs, f, indent=4, ensure_ascii=False)
 
