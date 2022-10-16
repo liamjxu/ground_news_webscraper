@@ -10,19 +10,6 @@ from selenium.common.exceptions import WebDriverException
 
 
 def main(args):
-    # set up driver
-    if args.headless:
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")
-        driver = webdriver.Chrome(options=chrome_options)
-    else:
-        driver = webdriver.Chrome()
-    driver.get('https://ground.news')
-    with open('credentials.json', 'r', encoding='utf-8') as f:
-        creds = json.load(f)
-    username = creds['username']
-    password = creds['password']
-    login(driver, username, password)
 
     # set up data folders
     if not os.path.exists(f'story_collection/{args.tag}_logs/'):
@@ -43,11 +30,11 @@ def main(args):
         topic_list = list(sorted(topic_list.items()))
 
         # Go through the segment and log each the status of each topic.
-        for topic, topic_href in topic_list:
+        for topic_idx, (topic, topic_href) in enumerate(topic_list):
             try:
                 # For each href in the topic_list, get stories for that href.
                 tic = time.time()
-                source, story_num, article_num = get_all_story_per_href(driver, topic_href, args.tag)
+                source, story_num, article_num = get_all_story_per_href(args, topic_href)
                 toc = time.time()
                 logs.append({
                     'topic': topic,
@@ -67,28 +54,43 @@ def main(args):
             # Each time a topic is finished, save the log of the current process.
             # Each topic takes ~10mins
             with open(f'story_collection/{args.tag}_logs/logs.json', 'w', encoding='utf-8') as f:
+                logs[0] = f'In Progress: {topic_idx + 1} / {len(topic_list)}'
                 json.dump(logs, f, ensure_ascii=False, indent=4)
 
         # At the end, mark the process as finished.
         with open(f'story_collection/{args.tag}_logs/logs.json', 'w', encoding='utf-8') as f:
-            logs[0] = 'Finished'
+            logs[0] = f'Finished: {topic_idx + 1} / {len(topic_list)}'
             json.dump(logs, f, ensure_ascii=False, indent=4)
 
     elif args.source == 'href':
         topic_href = '/' + '/'.join(args.href.split('/')[-2:])
-        ret = get_all_story_per_href(driver, topic_href, args.tag)
+        ret = get_all_story_per_href(args, topic_href)
         print(ret)
 
 
-def get_all_story_per_href(driver: webdriver.Chrome, href: str = '/interest/example', tag: str = 'latest'):
+def get_all_story_per_href(args, topic_href: str = '/interest/example'):
     '''For each of the topic, get the story informations and dump to a json file'''
 
     # some initialization
     root_url = 'https://ground.news'
-    topic_name = href.split('/')[-1]
+    topic_name = topic_href.split('/')[-1]
+
+    # set up driver
+    if args.headless:
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        driver = webdriver.Chrome(options=chrome_options)
+    else:
+        driver = webdriver.Chrome()
+    driver.get('https://ground.news')
+    with open('credentials.json', 'r', encoding='utf-8') as f:
+        creds = json.load(f)
+    username = creds['username']
+    password = creds['password']
+    login(driver, username, password)
 
     # Get all story hrefs for the topic
-    story_hrefs = get_all_shref_per_topic(driver, href)
+    story_hrefs = get_all_shref_per_topic(driver, topic_href)
     print('length of found story_hrefs:', len(story_hrefs))
 
     # Get article informations
@@ -101,7 +103,7 @@ def get_all_story_per_href(driver: webdriver.Chrome, href: str = '/interest/exam
         result[href.split('/')[-1].split('_')[0]] = story_data
 
         result['stats'] = f'finished idx: {story_idx + 1} / {len(story_hrefs)}'
-        with open(f'story_collection/{tag}_interest/{topic_name}.json', 'w', encoding='utf-8') as f:
+        with open(f'story_collection/{args.tag}_interest/{topic_name}.json', 'w', encoding='utf-8') as f:
             json.dump(result, f, indent=4, ensure_ascii=False)
 
     # quit driver
@@ -111,7 +113,7 @@ def get_all_story_per_href(driver: webdriver.Chrome, href: str = '/interest/exam
     story_num = len(result)
     article_num = len([y for x in list(result.values()) for y in x])
 
-    return href, story_num, article_num
+    return topic_href, story_num, article_num
 
 
 def get_all_shref_per_topic(driver: webdriver.Chrome, href: str = '/interest/example'):
