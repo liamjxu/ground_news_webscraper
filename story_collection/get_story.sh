@@ -8,5 +8,5 @@
 #    python -m story_collection.main --rank $i &
 # done
 # wait
-
-python -m story_collection.main --source topic_list --tag 1016 --headless
+TAG=1016
+python -m story_collection.main --source topic_list --tag ${TAG} --headless

@@ -25,7 +25,7 @@ def main(args):
             json.dump(logs, f, ensure_ascii=False, indent=4)
 
         # Get topic_list.
-        with open('topic_collection/topic_list.json', 'r') as f:
+        with open(f'topic_collection/{args.tag}_topic_list.json', 'r') as f:
             topic_list = json.load(f)
         topic_list = list(sorted(topic_list.items()))
 
