@@ -24,8 +24,8 @@ class Topic():
 
 def main(args):
     url = f'https://ground.news/my/discover/{args.category}'
-    headers = {"User-Agent": "Mozilla/5.0 (Linux; U; Android 4.2.2; he-il; NEO-X5-116A Build/JDQ39) AppleWebKit/534.30 ("
-                             "KHTML, like Gecko) Version/4.0 Safari/534.30"}
+    headers = {"User-Agent": "Mozilla/5.0 (Linux; U; Android 4.2.2; he-il; NEO-X5-116A Build/JDQ39) AppleWebKit/534.30"
+                             " (KHTML, like Gecko) Version/4.0 Safari/534.30"}
 
     # Get seed topics from the topic page
     html_text = requests.get(url, headers=headers).text
@@ -56,8 +56,8 @@ def main(args):
 def get_related_topics(topic: Topic) -> List[Topic]:
     topic, href = topic.get_tuple()
     url = 'https://ground.news' + href
-    headers = {"User-Agent": "Mozilla/5.0 (Linux; U; Android 4.2.2; he-il; NEO-X5-116A Build/JDQ39) AppleWebKit/534.30 ("
-                             "KHTML, like Gecko) Version/4.0 Safari/534.30"}
+    headers = {"User-Agent": "Mozilla/5.0 (Linux; U; Android 4.2.2; he-il; NEO-X5-116A Build/JDQ39) AppleWebKit/534.30"
+                             " (KHTML, like Gecko) Version/4.0 Safari/534.30"}
     html_text = requests.get(url, headers=headers).text
     soup = BeautifulSoup(html_text, 'lxml')
 
