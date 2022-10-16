@@ -40,11 +40,7 @@ The data:
 * None yet
 
 **Story & Article info collection** (output: `story_collection/interest/`)
-* serious bug: sometimes no biases are given but additional information exists, resulting in misplacements, which affects the full texts too
-* filter bad stories: sometimes a story has an empty article list
-* bug: mismatch between the `topic_collection/topic_list.json` and the `story_collection/interest/` directory (not all topics in the list have been collected)
-* current rank system is very confusing
-* why create and quit chrome driver every time?
+* create some slicing support
 
 **Full text collection** (output: `news/`)
 * currently, the topic progress won't let us know how many are filtered because of higher quality story (HQS) requirements.
