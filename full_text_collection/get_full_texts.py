@@ -2,28 +2,51 @@ import time
 import pathlib
 import json
 import argparse
-from story_collection.stats import qualify
 from newsplease import NewsPlease
 
 
+def main(args):
+    if args.source != 'all':
+        tic = time.time()
+        get_news_for_topic(args.source)
+        toc = time.time()
+        print(f'The topic {args.source} took {toc - tic} seconds')
+
+    else:
+        bad_topics = []
+        with open(f'topic_collection/{args.tag}_topic_list.json', 'r', encoding='utf-8') as f:
+            topic_list = [_[10:] for _ in json.load(f).values()]  # the 10 here corresponds to "/interest/"
+        for topic in topic_list:
+            try:
+                get_news_for_topic(topic)
+            except BaseException as e:
+                bad_topics.append({
+                    'topic': topic,
+                    'error_message': str(e)
+                })
+                with open(f'full_text_collection/{args.tag}_bad_topics.json', 'w', encoding='utf-8') as f:
+                    json.dump(bad_topics, f, indent=4, ensure_ascii=False)
+
+
 def get_news_for_topic(topic):
-    with open(f'story_collection/interest/{topic}.json', 'r', encoding='utf-8') as f:
+    with open(f'story_collection/{args.tag}_interest/{topic}.json', 'r', encoding='utf-8') as f:
         stories = json.load(f)
     # if the loading succeeded, make directory
-    pathlib.Path(f'news/{topic}').mkdir(parents=True, exist_ok=True)
+    pathlib.Path(f'{args.tag}_news/{topic}').mkdir(parents=True, exist_ok=True)
     logs = {'Topic Progress': f'-1 / {len(stories)}'}
-    with open(f'news/{topic}/0-logs.json', 'w', encoding='utf-8') as f:
+    with open(f'{args.tag}_news/{topic}/0-logs.json', 'w', encoding='utf-8') as f:
         json.dump(logs, f, indent=4, ensure_ascii=False)
+    
+    tic = time.time()
     for story_idx, (story, all_metadata) in enumerate(stories.items()):
-        story_log = []
-        if not qualify(all_metadata):
+        if story == 'stats':
             continue
+        story_log = []
         all_article = []
         for article_idx, metadata in enumerate(all_metadata):
-            # print(f'current article: {article_idx} / {len(all_metadata)}')
             try:
                 # get article and process
-                article = NewsPlease.from_url(metadata['source link'], timeout=6)
+                article = NewsPlease.from_url(metadata['source_link'], timeout=6)
                 article.__setattr__('article_idx', metadata['index'])
                 article.__setattr__('bias', metadata['bias'])
                 article.__setattr__('factuality', metadata['factuality'])
@@ -51,7 +74,7 @@ def get_news_for_topic(topic):
                     ]
                 })
                 # store the data, update the logs
-                with open(f'news/{topic}/{story}.json', 'w', encoding='utf-8') as f:
+                with open(f'{args.tag}_news/{topic}/{story}.json', 'w', encoding='utf-8') as f:
                     json.dump(all_article, f, indent=4, ensure_ascii=False)
 
                 # store the successful story_log
@@ -60,8 +83,9 @@ def get_news_for_topic(topic):
                     'status': 'Successful',
                 })
                 logs[story] = story_log
-                logs['Topic Progress'] = f'{story_idx} / {len(stories)}'
-                with open(f'news/{topic}/0-logs.json', 'w', encoding='utf-8') as f:
+                toc = time.time()
+                logs['Topic Progress'] = f'{story_idx} / {len(stories)}, time elapsed: {toc - tic: .2f}'
+                with open(f'{args.tag}_news/{topic}/0-logs.json', 'w', encoding='utf-8') as f:
                     json.dump(logs, f, indent=4, ensure_ascii=False)
 
             except BaseException as e:
@@ -72,42 +96,16 @@ def get_news_for_topic(topic):
                     'error_message': str(e)
                 })
                 logs[story] = story_log
-                logs['Topic Progress'] = f'{story_idx} / {len(stories)}'
-                with open(f'news/{topic}/0-logs.json', 'w', encoding='utf-8') as f:
+                logs['Topic Progress'] = f'{story_idx} / {len(stories)}, time elapsed: {toc - tic: .2f}'
+                with open(f'{args.tag}_news/{topic}/0-logs.json', 'w', encoding='utf-8') as f:
                     json.dump(logs, f, indent=4, ensure_ascii=False)
 
 
 if __name__ == '__main__':
-    RANK_WIDTH = 5  # 5 topics, usually takes ~5 hours
     parser = argparse.ArgumentParser()
-    parser.add_argument('--rank', type=int, default=1,
-                        help='the local rank of the current process')
     parser.add_argument('--source', type=str, default='gun-control',
                         help='the source topic, being "all" means collecting all topics')
+    parser.add_argument('--tag', type=str, default='latest',
+                        help='the tag to use for data version labeling')
     args = parser.parse_args()
-
-    if args.source != 'all':
-        tic = time.time()
-        get_news_for_topic(args.source)
-        toc = time.time()
-        print(f'The topic {args.source} took {toc - tic} seconds')
-
-    else:
-        bad_topics = []
-        with open('topic_collection/topic_list.json', 'r', encoding='utf-8') as f:
-            topic_list = [_[10:] for _ in json.load(f).values()]
-        for topic in topic_list[args.rank * RANK_WIDTH: (args.rank + 1) * RANK_WIDTH]:
-            print('current rank:', args.rank, 'current topic:', topic)
-            try:
-                tic = time.time()
-                get_news_for_topic(topic)
-                toc = time.time()
-            except BaseException as e:
-                bad_topics.append({
-                    'topic': topic,
-                    'error_message': str(e)
-                })
-                with open('full_text_collection/bad_topics.json', 'w', encoding='utf-8') as f:
-                    json.dump(bad_topics, f, indent=4, ensure_ascii=False)
-
-    print(f'Rank {args.rank} ({args.rank * RANK_WIDTH} to {(args.rank + 1) * RANK_WIDTH}) took {toc - tic} seconds')
+    main(args)

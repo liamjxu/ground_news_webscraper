@@ -43,11 +43,5 @@ The data:
 * create some slicing support
 
 **Full text collection** (output: `news/`)
-* currently, the topic progress won't let us know how many are filtered because of higher quality story (HQS) requirements.
-* we should also collect not HQS stories because they might be beneficial in other ways.
-* currently we don't know the progress for each process rank, maybe we should maintain a log to show the progress for each rank.
-* to avoid one article being included in mutliple stories and be crawled multiple times, maybe we should develop an indexing method and a dynamically checking process.
-* we need a filtering process to show how much HQS are there. (So, might as well just collect for all stories)
-* `full_text_stat.py` seems to give a higher number for HQS than `stats.py` (I really need to work on the reformatting & renaming)
-* beneficial to work on: balance load on each rank
-* check the current logs to see whether an article has been collected etc
+* to avoid one article being included in mutliple stories and be crawled multiple times, maybe we should develop an indexing method and a dynamically checking process (check the current logs to see whether an article has been collected etc).
+* `full_text_stat.py` seems to be giving a higher number for HQS than `stats.py` (I really need to work on the reformatting & renaming)
