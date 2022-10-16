@@ -100,7 +100,7 @@ def get_all_story_per_href(driver: webdriver.Chrome, href: str = '/interest/exam
             continue
         result[href.split('/')[-1].split('_')[0]] = story_data
 
-        result['stats'] = f'finished idx: {story_idx} / {len(story_hrefs)}'
+        result['stats'] = f'finished idx: {story_idx + 1} / {len(story_hrefs)}'
         with open(f'story_collection/{tag}_interest/{topic_name}.json', 'w', encoding='utf-8') as f:
             json.dump(result, f, indent=4, ensure_ascii=False)
 
