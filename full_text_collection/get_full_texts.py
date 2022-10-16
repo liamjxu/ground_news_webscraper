@@ -14,6 +14,7 @@ def main(args):
 
     else:
         bad_topics = []
+        pathlib.Path(f'full_text_collection/{args.tag}_bad_topics.json').unlink(missing_ok=True)
         with open(f'topic_collection/{args.tag}_topic_list.json', 'r', encoding='utf-8') as f:
             topic_list = [_[10:] for _ in json.load(f).values()]  # the 10 here corresponds to "/interest/"
         for topic in topic_list:
@@ -36,7 +37,7 @@ def get_news_for_topic(topic):
     logs = {'Topic Progress': f'-1 / {len(stories)}'}
     with open(f'{args.tag}_news/{topic}/0-logs.json', 'w', encoding='utf-8') as f:
         json.dump(logs, f, indent=4, ensure_ascii=False)
-    
+
     tic = time.time()
     for story_idx, (story, all_metadata) in enumerate(stories.items()):
         if story == 'stats':
