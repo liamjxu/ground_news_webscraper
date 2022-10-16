@@ -22,8 +22,8 @@ class Topic():
         return [cls(name, href) for name, href in zip(names, hrefs)]
 
 
-def main(category):
-    url = f'https://ground.news/my/discover/{category}'
+def main(args):
+    url = f'https://ground.news/my/discover/{args.category}'
     headers = {"User-Agent": "Mozilla/5.0 (Linux; U; Android 4.2.2; he-il; NEO-X5-116A Build/JDQ39) AppleWebKit/534.30 ("
                              "KHTML, like Gecko) Version/4.0 Safari/534.30"}
 
@@ -43,14 +43,14 @@ def main(category):
         else:
             topic_list |= queue[0].get_dict()
             queue = queue[1:] + get_related_topics(queue[0])
-            with open(f'topic_collection/topic_list_{category}.json', 'w', encoding='utf-8') as f:
+            with open(f'topic_collection/{args.tag}_topic_list_{args.category}.json', 'w', encoding='utf-8') as f:
                 topic_list = OrderedDict(sorted(topic_list.items()))
                 json.dump(topic_list, f, indent=4, ensure_ascii=False)
         if len(topic_list) >= 2000:
             break
         if len(topic_list) % 50 == 0:
-            print(f'Collected {len(topic_list)} topics from {category}.')
-    print(f'{category} finished')
+            print(f'Collected {len(topic_list)} topics from {args.category}.')
+    print(f'{args.category} finished')
 
 
 def get_related_topics(topic: Topic) -> List[Topic]:
@@ -76,5 +76,7 @@ if __name__ == '__main__':
     parser.add_argument('--category', type=str,
                         help='the discover category that the scraper will be using as a starting point',
                         choices=['topic', 'place', 'person', 'source'])
+    parser.add_argument('--tag', type=str, default='latest',
+                        help='the tag to use for data version labeling')
     args = parser.parse_args()
-    main(args.category)
+    main(args)
