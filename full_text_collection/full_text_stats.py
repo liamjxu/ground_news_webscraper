@@ -14,7 +14,9 @@ def main(args):
     # the number of stories
     all_story = []
     for topic in os.listdir(f'{args.tag}_news'):
-        for story in os.listdir(f'{args.tag}_news/{topic}')[1:]:  # get rid of the 0-logs.json file
+        for story in os.listdir(f'{args.tag}_news/{topic}'):  # get rid of the 0-logs.json file
+            if story == '0-logs.json':
+                continue
             all_story.append(f'{args.tag}_news/{topic}/{story}')
     print(f'The number of collected stories: {len(all_story)}')
 
