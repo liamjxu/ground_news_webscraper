@@ -2,11 +2,11 @@
 
 The crawling happens on 3 different levels:
 1. **To collect the topic list**
-   1. BFS on the topics that are offered on `ground.news`
-2. **To collect the story lists within each topic list**
-   1. Each story has multiple articles 
-3. **To collect the full texts for each topic**
-   1. Currently we only attempted to keep higher quality stories
+   * BFS on the topics that are offered on [ground.news](https://ground.news/)
+2. **To collect the story lists for each topic within the collected topic list**
+   * Each story has multiple articles
+3. **To collect the full texts for each article**
+   * The collected articles are organized under each story and the same stroy might exist for the different stories.
 
 The data:
 1. **Topic**: the highest level, which is one of
@@ -20,7 +20,7 @@ The data:
 3. **Article**: the lowest level, which is the collection of information about an article:
    * `article_idx`: the index of the article within the story
    * `bias`: the bias labeled by `ground.news` (one of "Left", "Lean Left", "Center", "Lean Right", "Right", "Unknown")
-   * `factuality`: the factuality labeled by `ground.news` (one of "High", "Low", "Mixed", "Unknown")
+   * `factuality`: the factuality labeled by `ground.news` (one of "High Factuality", "Low Factuality", "Mixed Factuality", "Unknown")
    * `name`: name of the news agency
    * `date_publish`: the date of the article got published
    * `image_url`: the URL to the news image (if any)
