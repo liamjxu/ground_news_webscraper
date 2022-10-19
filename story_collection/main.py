@@ -200,13 +200,16 @@ def get_html_with_more_stories(driver, url, more=15):
     if more == 'all':
         yes_more_stories = True
         while yes_more_stories:
+            # This allows the page to reload, resulting in actually more stories.
+            time.sleep(1)
             try:
-                # close
+                # Try to click on the close button asking for subscription sometimes.
                 close_input = driver.find_element(By.XPATH, "//button[@class='react-responsive-modal-closeButton']")
                 close_input.click()
             except BaseException:
                 pass
 
+            # Try to click on the actual more stories button.
             try:
                 driver.find_element(By.ID, button_id).click()
             except BaseException:
@@ -214,14 +217,17 @@ def get_html_with_more_stories(driver, url, more=15):
     else:
         cnt = 0
         while cnt < more:
-            # time.sleep(1)
+            # This allows the page to reload, resulting in actually more stories.
+            time.sleep(1)
+
+            # Try to click on the close button asking for subscription sometimes.
             try:
-                # close
                 close_input = driver.find_element(By.XPATH, "//button[@class='react-responsive-modal-closeButton']")
                 close_input.click()
             except BaseException:
                 pass
 
+            # Try to click on the actual more stories button.
             try:
                 driver.find_element(By.ID, button_id).click()
             except BaseException:
