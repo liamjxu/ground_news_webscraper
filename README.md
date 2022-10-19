@@ -44,4 +44,4 @@ The data:
 
 **Full text collection** (output: `news/`)
 * to avoid one article being included in mutliple stories and be crawled multiple times, maybe we should develop an indexing method and a dynamically checking process (check the current logs to see whether an article has been collected etc).
-* `full_text_stat.py` seems to be giving a higher number for HQS than `stats.py` (I really need to work on the reformatting & renaming)
+* check the stats, e.g., there seem to be a discrepancy between the number of stories in `full_text_collection\full_text_stats.py` and `story_collection\stats.py`
