@@ -41,6 +41,7 @@ The data:
 
 **Story & Article info collection** (output: `story_collection/interest/`)
 * create some slicing support
+* note that some topics are getting much lower stories than it should be (e.g., `tim-cook` has only 20-ish stories?? Ok I see, this might be due to the fact that we cancelled the waiting between clicking "more stories"), some sort of auto-merging is needed for sure now.
 
 **Full text collection** (output: `news/`)
 * to avoid one article being included in mutliple stories and be crawled multiple times, maybe we should develop an indexing method and a dynamically checking process (check the current logs to see whether an article has been collected etc).
