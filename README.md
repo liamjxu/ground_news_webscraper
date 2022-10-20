@@ -68,6 +68,13 @@ The webscraper has the following functionalities:
         ```
 
     * In Option 2, the `<topic-href>` can be found in the URL of the topic page. E.g., https://ground.news/interest/gun-control talks about gun control, and the `<topic-href>` for the topic gun control is `/interest/gun-control`
+    
+    * The collecting process can be monitored in a terminal with 
+
+        ```bash
+        TAG=<your-tag> sh story_collection/monitor.sh
+        ```
+    
     * If the program is executed correctly, under `story_collection/` you should see 2 non-empty directories, 1 with name `${TAG}_interest/` and the other  `${TAG}_logs/`, the former containing story informations and the lateer logs. 
 
 
@@ -88,6 +95,13 @@ The webscraper has the following functionalities:
         ```
 
     * In Option 2, the `<topic-name>` can be found in the URL of the topic page. E.g., https://ground.news/interest/gun-control talks about gun control, and the `<topic-name>` for the topic gun control is `gun-control`
+
+    * The collecting process can be monitored in a terminal with 
+
+        ```bash
+        TAG=<your-tag> sh full_text_collection/monitor.sh
+        ```
+
     * If the program is executed correctly, under the root directory you should see a `{TAG}_news/` directory containing all the articles, organized into topics and stories.
 
 ## Data Structures
