@@ -1,5 +1,4 @@
 #!/bin/bash
-TAG=1016
 while :; 
     do 
     clear

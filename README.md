@@ -1,14 +1,96 @@
-# Description
+# Ground News Webscraper
 
-The crawling happens on 3 different levels:
-1. **To collect the topic list**
-   * BFS on the topics that are offered on [ground.news](https://ground.news/)
-2. **To collect the story lists for each topic within the collected topic list**
-   * Each story has multiple articles
-3. **To collect the full texts for each article**
-   * The collected articles are organized under each story and the same stroy might exist for the different stories.
+This is the repostory hosting the code for 
+1. Webscraping structured article informations from [`ground.news`](https://ground.news/)
+2. Collecting the full article texts from their own websites. 
 
-The data:
+## Background
+
+Since there are ad hoc efforts targeting the ground.news website, some background info about it is beneficial for understanding the code. Below is a quick key-point recap about ground.news:
+1. ground.news is a News Aggregation platform. It has a clear topic-story-article structure.
+   1. Topic is the highest level, it can be an social aspect (*e.g.*, `politics`), a person (*e.g.*, `tim-cook`), a place (*e.g.*, `iran`), or a news source (*e.g.*, `npr`).
+   2. Story is the middel level, which is an event that got coverage from different sources.
+   3. Article is the lowest level, which is the collection of information about an article.
+2. ground.news provides, for each article, some critical information that we are querying:
+   1. News agency labels such as their `bias` and `factuality`.
+   2. The `URL` to the original news website (Note that it does not offer full texts directly, thus we need the second step in the [overview](#ground-news-webscraper))
+
+## Usage
+
+### 1. Set up the Environment
+```bash
+# You may want to use a virtual environment or conda environment
+pip install -r requirements.txt
+```
+
+### 2. Set up the Credentials
+```bash
+# Replace <your-username> and <your-password> with your ground.news credentials
+export YOUR_USERNAME=<your-username>
+export YOUR_PASSWORD=<your-password>
+
+# create the credentials.json file
+echo "{\"username\": \"${YOUR_USERNAME}\", \"password\": \"${YOUR_PASSWORD}\"}" > credentials.json
+```
+
+### 3. Utilize the Functionalities
+
+The webscraper has the following functionalities:
+1. **To collect the topic list (from ground.news)**
+    * The topic list is a collection of ground.news topics. Currenlty we implemented BFS in attempt to collect ALL topics that are offered on the ground.news website. **If you already have a specific topic that you are interested in, skip this step and start with step 2, script Option 2.**
+    
+    * To collect the topic list automatically, refer to [`topic_collection/get_more_topic.sh`](topic_collection/get_more_topic.sh)
+  
+        ```bash
+        # Data Collection version is controlled by tagging
+        export TAG=<your-tag> 
+        sh topic_collection/get_more_topic.sh
+        ```
+    
+    * If the program is executed correctly, under `topic_collection/` you should see 5 json files, 1 for each of the types as described [here](#background), and one compiled `${TAG}_topic_list.json` that should contain >300 topics. Note that one run of the above code is not exhaustive (since it depends on the order ground.news presents to us) You can run the above code multiple times and the topics
+  
+2. **To collect story lists for topics**
+    * Under each topic there are multiple stories that ground.news compiles and releases everyday. To collect the story list we query all stories under the topic page on the ground.news website.
+
+    * To collect the story lists automatically, refer to [`story_collection/get_story.sh`](story_collection/get_story.sh)
+  
+        ```bash
+        # Data Collection version is controlled by tagging
+        export TAG=<your-tag> 
+
+        # Option 1: collect from a topic list from step 1
+        # This option assumes ${TAG}_topic_list.json exists under topic_collection/
+        python -m story_collection.main --source topic_list --tag ${TAG} --headless
+
+        # Option 2: collect from a specific topic with that topic's href
+        # See below on what to fill in for <topic-href>
+        python -m story_collection.main --source href --href <topic-href> --tag ${TAG} --headless
+        ```
+
+    * In Option 2, the `<topic-href>` can be found in the URL of the topic page. E.g., https://ground.news/interest/gun-control talks about gun control, and the `<topic-href>` for the topic gun control is `/interest/gun-control`
+    * If the program is executed correctly, under `story_collection/` you should see 2 non-empty directories, 1 with name `${TAG}_interest/` and the other  `${TAG}_logs/`, the former containing story informations and the lateer logs. 
+
+
+3. **To collect the full texts**
+    * Each story has multiple articles. In this step, you will need the story list(s) generated from step 2.
+    * To collect the story lists automatically, refer to [`full_text_collection/get_full_texts.sh`](full_text_collection/get_full_texts.sh)
+  
+        ```bash
+        # Data Collection version is controlled by tagging
+        export TAG=<your-tag> 
+
+        # Option 1: collect from all story lists from step 2
+        python -m full_text_collection.get_full_texts --source all --tag ${TAG}
+
+        # Option 2: collect from a specific topic with that topic's story list
+        # See below on what to fill in for <topic-name>
+        python -m full_text_collection.get_full_texts --source <topic-name> --tag ${TAG}
+        ```
+
+    * In Option 2, the `<topic-name>` can be found in the URL of the topic page. E.g., https://ground.news/interest/gun-control talks about gun control, and the `<topic-name>` for the topic gun control is `gun-control`
+    * If the program is executed correctly, under the root directory you should see a `{TAG}_news/` directory containing all the articles, organized into topics and stories.
+
+## Data Structures
 1. **Topic**: the highest level, which is one of
    1. abstract topics such as `politics` or `trade`; 
    2. places such as `iran` or `pakistan`; 
