@@ -4,6 +4,7 @@ credentials.json
 *.ipynb
 *.txt
 !requirements.txt
+local_*.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
