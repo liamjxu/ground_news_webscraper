@@ -239,6 +239,15 @@ def get_html_with_more_stories(driver, url, more=15):
 
 
 def login(driver: webdriver.Chrome, username: str, password: str):
+    # check when login there exist the Susond, if exist close it
+    try:
+        suspondWindow = driver.find_element(By.XPATH, "//button[@class='react-responsive-modal-closeButton']")
+        suspondWindow.click()
+        print(f"searchKey: Suspond Main page had been closed.")
+        time.sleep(1)
+    except Exception as e:
+        print(f"searchKey: there is no suspond Page1. e = {e}")
+        
     login_button = driver.find_element(By.ID, "header-login")
     login_button.click()
 
