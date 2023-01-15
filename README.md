@@ -47,7 +47,7 @@ The webscraper has the following functionalities:
         sh topic_collection/get_more_topic.sh
         ```
     
-    * If the program is executed correctly, under `topic_collection/` you should see 5 json files, 1 for each of the types as described [here](#background), and one compiled `${TAG}_topic_list.json` that should contain >300 topics. Note that one run of the above code is not exhaustive (since it depends on the order ground.news presents to us) You can run the above code multiple times and the topics
+    * If the program executes correctly, you should see 5 json files under `topic_collection/`, 1 for each of the types as described [here](#background), and one compiled `${TAG}_topic_list.json` that should contain >300 topics. Note that one run of the above code is not exhaustive (as BFS does not necessarily cover all nodes in a graph). You can run the above code multiple times and the topics collected will be unionized.
   
 2. **To collect story lists for topics**
     * Under each topic there are multiple stories that ground.news compiles and releases everyday. To collect the story list we query all stories under the topic page on the ground.news website.
