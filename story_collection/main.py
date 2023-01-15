@@ -7,6 +7,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options  # for suppressing the browser
 from selenium.common.exceptions import WebDriverException
+from webdriver_manager.chrome import ChromeDriverManager
 
 
 def main(args):
@@ -79,9 +80,9 @@ def get_all_story_per_href(args, topic_href: str = '/interest/example'):
     if args.headless:
         chrome_options = Options()
         chrome_options.add_argument("--headless")
-        driver = webdriver.Chrome(options=chrome_options)
+        driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
     else:
-        driver = webdriver.Chrome()
+        driver = webdriver.Chrome(ChromeDriverManager().install())
     driver.get('https://ground.news')
     with open('credentials.json', 'r', encoding='utf-8') as f:
         creds = json.load(f)
